@@ -316,9 +316,6 @@ if (isset($_GET['file'])) {
         echo '<p class="error">File tidak dapat dibaca.</p>';
     }
 }
-
-            } else {
-                echo '<p class="error">File tidak dapat dibaca.</p>';
             
         } else {
             // Menampilkan folder

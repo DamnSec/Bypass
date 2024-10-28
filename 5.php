@@ -278,7 +278,9 @@ input[type="submit"]:hover {
             }
         }
 
-       if (isset($_GET['file'])) {
+ <?php
+// Cek jika ada file yang dipilih
+if (isset($_GET['file'])) {
     $filePath = $targetDir . '/' . $_GET['file'];
     if (file_exists($filePath) && is_readable($filePath)) {
         // Handle file content update
@@ -317,24 +319,21 @@ input[type="submit"]:hover {
     } else {
         echo '<p class="error">File tidak dapat dibaca.</p>';
     }
-} // Pastikan semua kurung tutup cocok
+} else {
+    // Menampilkan folder dan file jika tidak ada file yang dipilih
+    echo '<h2>File Manager</h2>';
+    echo '<table>';
+    echo '<thead><tr><th>Folder/File</th></tr></thead><tbody>';
+    foreach ($folders as $folder) {
+        echo '<tr><td class="folder"><a href="?dir=' . urlencode($targetDir . '/' . $folder) . '" class="folder-link"><i class="fas fa-folder icon-folder"></i>' . htmlspecialchars($folder) . '</a></td></tr>';
+    }
 
-        } else {
-            // Menampilkan folder
-            echo '<h2>File Manager</h2>';
-            echo '<table>';
-            echo '<thead><tr><th>Folder/File</th></tr></thead><tbody>';
-            foreach ($folders as $folder) {
-                echo '<tr><td class="folder"><a href="?dir=' . urlencode($targetDir . '/' . $folder) . '" class="folder-link"><i class="fas fa-folder icon-folder"></i>' . htmlspecialchars($folder) . '</a></td></tr>';
-            }
-
-            // Menampilkan file
-            foreach ($filesList as $file) {
-                echo '<tr><td class="file"><a href="?dir=' . urlencode($targetDir) . '&file=' . urlencode($file) . '" class="file-link"><i class="fas fa-file icon-file"></i>' . htmlspecialchars($file) . '</a></td></tr>';
-            }
-            echo '</tbody></table>';
-        }
-        ?>
+    foreach ($filesList as $file) {
+        echo '<tr><td class="file"><a href="?dir=' . urlencode($targetDir) . '&file=' . urlencode($file) . '" class="file-link"><i class="fas fa-file icon-file"></i>' . htmlspecialchars($file) . '</a></td></tr>';
+    }
+    echo '</tbody></table>';
+}
+?>
     </div>
 
     <script>

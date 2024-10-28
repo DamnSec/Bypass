@@ -308,7 +308,7 @@
                 // Delete File
                 echo '<form method="POST" action="">';
                 echo '<input type="hidden" name="delete_file" value="' . htmlspecialchars($_GET['file']) . '">';
-                echo '<input type="submit" value="Delete" onclick="return confirm('\Are you sure you want to delete this file?\');">';
+                echo '<input type="submit" value="Delete" onclick="return confirm(\'Are you sure you want to delete this file?\');">';
                 echo '</form>';
 
                 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_file'])) {

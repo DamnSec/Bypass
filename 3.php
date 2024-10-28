@@ -314,9 +314,7 @@ if (isset($_GET['file'])) {
         echo '</form>';
     } else {
         echo '<p class="error">File tidak dapat dibaca.</p>';
-    }
-}
-            
+    }            
         } else {
             // Menampilkan folder
             echo '<h2>File Manager</h2>';

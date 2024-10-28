@@ -278,18 +278,20 @@ input[type="submit"]:hover {
             }
         }
 
-        <!-- Menampilkan konten file jika parameter file ada -->
-if (isset($_GET['file'])) {
+       if (isset($_GET['file'])) {
     $filePath = $targetDir . '/' . $_GET['file'];
     if (file_exists($filePath) && is_readable($filePath)) {
+        // Handle file content update
         if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['content'])) {
             file_put_contents($filePath, $_POST['content']);
             echo '<div class="notification success">File updated successfully.</div>';
         }
+
+        // Display edit form
         echo '<h3>Edit File: ' . htmlspecialchars($_GET['file']) . '</h3>';
         echo '<form method="POST"><textarea name="content" rows="10" cols="50" style="width: 100%;"></textarea><br>';
         echo '<input type="submit" value="Save Changes" style="background-color: #28a745; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;"></form>';
-        
+
         // Rename
         echo '<h4>Rename File</h4>';
         echo '<form method="POST" action="" style="margin-bottom: 20px;">';
@@ -314,7 +316,9 @@ if (isset($_GET['file'])) {
         echo '</form>';
     } else {
         echo '<p class="error">File tidak dapat dibaca.</p>';
-    }            
+    }
+} // Pastikan semua kurung tutup cocok
+
         } else {
             // Menampilkan folder
             echo '<h2>File Manager</h2>';

